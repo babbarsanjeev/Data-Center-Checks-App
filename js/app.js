@@ -197,6 +197,34 @@ const Views = {
       </div>`;
   },
 
+  _siteReportSection(insp, recipient) {
+    const siteInsps = Storage.getInspections().filter(i =>
+      i.systemId === insp.systemId && i.date === insp.date
+    );
+    if (siteInsps.length <= 1) return '';
+
+    const cabNames = siteInsps.map(i => getCabinetLabel(i.systemId, i.cabinetNo || 1)).join(', ');
+    const sysName  = DC_SYSTEMS[insp.systemId]?.name || insp.systemId;
+    const ids      = JSON.stringify(siteInsps.map(i => i.id));
+
+    return `
+      <div class="site-report-section mt-16">
+        <div class="section-title mb-4">Site Report — All Cabinets (${sysName})</div>
+        <div class="text-sm text-muted mb-8">${siteInsps.length} cabinets inspected on ${insp.date}: ${escapeHtml(cabNames)}</div>
+        <div class="export-grid">
+          <button class="btn btn-primary btn-sm" onclick="App.downloadSiteXLS('${escapeHtml(insp.systemId)}','${insp.date}')">
+            ${Icons.excel} Combined XLS
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="App.downloadSiteHTML('${escapeHtml(insp.systemId)}','${insp.date}')">
+            ${Icons.file} Combined Report
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="App.emailSiteReport('${escapeHtml(insp.systemId)}','${insp.date}','${escapeHtml(recipient)}')">
+            ${Icons.mail} Email All Cabinets
+          </button>
+        </div>
+      </div>`;
+  },
+
   // ── New Inspection Setup ──────────────────────────────────────────────────
   newInspection() {
     const settings   = Storage.getSettings();
@@ -495,7 +523,7 @@ const Views = {
               </table>
             </div>
           </div>
-          <div class="section-title mb-8">Export &amp; Share</div>
+          <div class="section-title mb-8">Export &amp; Share — This Cabinet</div>
           <div class="export-grid">
             <button class="btn btn-secondary btn-sm" onclick="Export.downloadCSV(Storage.getInspection('${id}'))">
               ${Icons.download} CSV
@@ -510,6 +538,7 @@ const Views = {
               ${Icons.mail} Email
             </button>
           </div>
+          ${Views._siteReportSection(insp, recipient)}
         </div>
         ${buildNav('history')}
       </div>`;
@@ -978,6 +1007,32 @@ const App = {
     const systemId = all[0].systemId;
     Export.downloadCSVMultiple(all.filter(i => i.systemId === systemId), systemId);
     showToast('Downloading CSV…');
+  },
+
+  _getSiteInspections(systemId, date) {
+    return Storage.getInspections().filter(i => i.systemId === systemId && i.date === date)
+      .sort((a, b) => (a.cabinetNo || 1) - (b.cabinetNo || 1));
+  },
+
+  downloadSiteXLS(systemId, date) {
+    const insps = this._getSiteInspections(systemId, date);
+    if (!insps.length) { showToast('No inspections found'); return; }
+    Export.downloadSiteXLS(insps);
+    showToast(`Downloading combined XLS — ${insps.length} cabinet(s)…`);
+  },
+
+  async downloadSiteHTML(systemId, date) {
+    const insps = this._getSiteInspections(systemId, date);
+    if (!insps.length) { showToast('No inspections found'); return; }
+    showToast('Generating combined report…');
+    await Export.downloadSiteHTMLReport(insps);
+    showToast(`Combined HTML report — ${insps.length} cabinet(s)`);
+  },
+
+  emailSiteReport(systemId, date, recipient) {
+    const insps = this._getSiteInspections(systemId, date);
+    if (!insps.length) { showToast('No inspections found'); return; }
+    Export.emailSiteReport(insps, recipient);
   },
 
   exportAllXLS() {

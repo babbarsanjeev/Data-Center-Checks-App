@@ -558,6 +558,26 @@ select.status-gray { background-color: var(--gray-bg); border-color: var(--gray)
   .history-grid { grid-template-columns: 1fr 1fr 1fr; }
 }
 
+/* ─── Site Report Section ─────────────────────────────────────────────────── */
+.site-report-section {
+  background: linear-gradient(135deg, #eff6ff, #eef2ff);
+  border: 2px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 16px;
+}
+.site-report-section .section-title {
+  color: #1e40af;
+}
+.site-report-section .export-grid .btn {
+  background: #1e40af;
+  color: white;
+  border: none;
+}
+.site-report-section .export-grid .btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════════
    PRINT STYLES
    ═══════════════════════════════════════════════════════════════════════════════ */

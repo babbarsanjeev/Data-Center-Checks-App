@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'dc-sanity-v2';
+const CACHE_NAME = 'dc-sanity-v3';
 const ASSETS = [
   './',
   './index.html',
