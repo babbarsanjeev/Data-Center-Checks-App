@@ -714,8 +714,13 @@ const App = {
     const units  = getCabinetUnits(systemId, cabinetNo);
     const preId  = Storage.generateId();
     AppState.pendingInspection = {
-      systemId, cabinetNo, type, date, engineer, status: 'INCOMPLETE', _preId: preId,
-      units: units.map(u => ({ srNo: u.srNo, unit: u.unit, frontStatus: '', backStatus: '', notes: '', hasPhoto: false })),
+      systemId, cabinetNo, type, date, engineer, status: 'OK', _preId: preId,
+      units: units.map(u => ({
+        srNo: u.srNo, unit: u.unit,
+        frontStatus: getDefaultOkValue(u.frontOptions),
+        backStatus:  getDefaultOkValue(u.backOptions),
+        notes: '', hasPhoto: false,
+      })),
     };
     AppState.photoThumbs = {};
     AppState.view = 'checklist';
@@ -841,7 +846,7 @@ const App = {
     const insp     = AppState.pendingInspection;
     if (!insp) return;
     const nextSrNo = insp.units.reduce((max, u) => Math.max(max, u.srNo), 0) + 1;
-    const newUnit  = { srNo: nextSrNo, unit: name, frontStatus: '', backStatus: '', notes: '', isCustom: true, hasPhoto: false };
+    const newUnit  = { srNo: nextSrNo, unit: name, frontStatus: 'GREEN LED', backStatus: 'GREEN LED', notes: '', isCustom: true, hasPhoto: false };
     insp.units.push(newUnit);
     const container = document.getElementById('units-container');
     if (container) {

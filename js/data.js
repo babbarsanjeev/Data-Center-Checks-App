@@ -523,6 +523,15 @@ function getCabinetUnits(systemId, cabinetNo) {
 }
 
 /**
+ * Returns the default "OK" value for a given set of status options.
+ * Picks the first option whose severity is 0 (healthy), skipping blank and N/A.
+ */
+function getDefaultOkValue(options) {
+  const ok = options.find(o => o.value !== '' && o.value !== 'N/A' && (STATUS_SEVERITY[o.value] ?? -1) === 0);
+  return ok ? ok.value : '';
+}
+
+/**
  * Returns the display label for a cabinet (e.g. "Cabinet 1").
  */
 function getCabinetLabel(systemId, cabinetNo) {
